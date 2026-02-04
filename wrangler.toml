@@ -4,4 +4,4 @@ compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "COUNTER_KV"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "d9b5369f960140b591a71eb5de0a0f74"
