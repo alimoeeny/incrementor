@@ -198,32 +198,37 @@ export default {
       }
     }
 
-    // Increment all relevant counters in parallel
-    const counters = {};
-    const promises = [];
+    // if this is embeded in their local / dev page
+    if (referer && (referer.includes('localhost') || referer.includes("127.0.0.1"))) {
+      // do nothing
+    } else {
+      // Increment all relevant counters in parallel
+      const counters = {};
+      const promises = [];
 
-    // Main counter: my-key
-    promises.push(
-      incrementCounter(env.COUNTER_KV, key).then(c => counters.total = c)
-    );
-
-    // Domain counter: my-key:example.com
-    if (domain) {
-      const domainKey = `${key}:${domain}`;
+      // Main counter: my-key
       promises.push(
-        incrementCounter(env.COUNTER_KV, domainKey).then(c => counters.domain = c)
+        incrementCounter(env.COUNTER_KV, key).then(c => counters.total = c)
       );
 
-      // Page counter: my-key:example.com:/blog/post
-      if (page) {
-        const pageKey = `${key}:${domain}:${page}`;
+      // Domain counter: my-key:example.com
+      if (domain) {
+        const domainKey = `${key}:${domain}`;
         promises.push(
-          incrementCounter(env.COUNTER_KV, pageKey).then(c => counters.page = c)
+          incrementCounter(env.COUNTER_KV, domainKey).then(c => counters.domain = c)
         );
-      }
-    }
 
-    await Promise.all(promises);
+        // Page counter: my-key:example.com:/blog/post
+        if (page) {
+          const pageKey = `${key}:${domain}:${page}`;
+          promises.push(
+            incrementCounter(env.COUNTER_KV, pageKey).then(c => counters.page = c)
+          );
+        }
+      }
+
+      await Promise.all(promises);
+    }
 
     return new Response(JSON.stringify({ key, domain, page, counters }), {
       headers: {
